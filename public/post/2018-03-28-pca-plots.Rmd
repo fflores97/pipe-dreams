@@ -76,7 +76,7 @@ So let's say I have a matrix `expressionMatrix` that represents gene expression,
 
 So let's do it! User input would be the expression matrix itself and the number of PC plots to display. Since I'm interested in the PCA of samples, I will transpose my expression matrix before feeding it to R's `prcomp`. Let's use the airway dataset for demonstration. I first need to obtain a variance-stabilized data matrix following the procedure outlined [here](https://bioconductor.org/help/workflows/rnaseqGene/)
 
-```{r,include=FALSE,echo=TRUE,cache=TRUE}
+```{r,echo=TRUE,cache=TRUE}
 expressionMatrix <- assay(vsd)
 pca <- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
 ```
@@ -203,59 +203,80 @@ samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=0,autoClustering=F
 By doing this, if the user determines they want auto clustering, eclust will find the optimal number for us. Let's keep going.
 
 ```{r eval=FALSE}
-# Rest of the code remains the same up to the declaration of pcaDF
-  if (autoClustering) {
-    clusterNumber <- NULL
-  } else{
-    clusterNumber=0
-  }
-
-  if (clusters != 0) {
+if (clusters != 1 || autoClustering) { # Case 1: If either the user specifies a number of clusters or automatic clustering, then this part of code is triggered
     # Using factoextra's eclust to find clusters
+    pdf(NULL) # This is just to suppress the graphical output for the moment, but we wanna save this plot later
     eclustering <- factoextra::eclust(
       t(expressionMatrix),
       FUNcluster = "kmeans",
       k=clusterNumber,
-      k.max=min(10,nrow(t(expressionMatrix)))
-    ) 
+      k.max=min(10,nrow(t(expressionMatrix))-1)
+    )
+    dev.off()
     
     # Join the dataframe with the clustering information as a tibble
     pcaDF <- pcaDF %>% 
-      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster]))
+      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster])) # Notice I converted the clusters to letters instead of numbers. ggpairs can deal with this categorical data much better. Factors could also have been used but meh /shrug
     
     # Generating the grid plot with clusters for colors and samples for shapes
-    pcaPlot <- GGally::ggpairs(
-      data=pcaDF,
-      columns=1:numberOfPCs+2, # Note that we have to add an extra column
-      mapping = aes(col=Cluster,shape=Sample), # Changed aesthetics to add cluster information
-      lower=list(continuous=GGally::wrap("points",size=3)),
-      upper=NULL,
-      legend = c(2,1)
-    )
     
-  } else { # Here everything is as before adding the clustering feature
-    pcaPlot <- GGally::ggpairs(
+    if (ncol(expressionMatrix)>6){ # This part is added because ggpairs allows up to 6 different shapes. Any more than that and the data points will disappear! Maybe in the future they'll implement a feature to increment them
+      graphingParameters <- list(mapping=aes(shape=Cluster,col=Sample)) # In such a case, we flip the shape and cluster parameters
+    } else{
+      graphingParameters <- list(mapping=aes(col=Cluster,shape=Sample))
+    }
+  } 
+
+
+else { # Case 2: User wants no clustering
+    if(colorByCluster){
+      graphingParameters <- list(mapping=aes(col=Cluster)) # If the user prefers to 
+    } else{
+      graphingParameters <- list(mapping=aes(col=Sample))
+    }
+  }
+```
+
+Bunch of nested if's, I know. I unfortunately don't yet know a better way to do this. The logic is quite simple, however:
+
+* We first check whether the user wants to cluster or not. If the user does not want to cluster, then they have the choice to color by cluster or sample. In the future I will make this a single argument (`colorBy` that allows for those options, but I don't know how to do that right now). 
+
+* In case the user wants clustering, the one other check is done is the number of samples. If there are too many of them (>6), ggpairs won't allow that many shapes, so in that case we trade shapes and colors (samples and clusters). I hope something native for ggpairs is implemented in the future. 
+
+That practically completes the picture! All we're missing is making the actual remaining plots with the remaining graphical parameters
+```{r, eval=FALSE}
+graphingParameters <- c(
+    graphingParameters, # aes() parameters from the nested if's
+    list(
       data=pcaDF,
-      columns=1:numberOfPCs+1,
-      mapping = aes(col=Sample),
+      columns=1:numberOfPCs+2,
       lower=list(continuous=GGally::wrap("points",size=3)),
       upper=NULL,
       legend = c(2,1)
     )
-  }
+  )
   
-  pcaPlot<- pcaPlot + theme_bw() +
+  pcaPlot <- do.call(GGally::ggpairs,graphingParameters) # Generate the plot with these parameters
+  
+  # Add a few details:
+  pcaPlot <- pcaPlot + theme_bw() + 
     labs(title="Principal Components")+
     theme(plot.title=element_text(hjust=0.5))
   
-  returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot)
-  return(returnList)
+  # We also customize the clustering plot from eclust a little bit:
+  clusteringPlot <- eclustering$clust_plot + 
+    theme_bw()+
+    theme(plot.title = element_text(hjust = 0.5))
   
-} # end of function
+  # And return them to the user!
+  returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot, clusteringPlot = clusteringPlot)
+  return(returnList)
 ```
 
-```{r,include=FALSE,echo=FALSE}
-samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=FALSE){
+And that completes the function! In one block it looks like:
+
+```{r,include=TRUE,echo=FALSE}
+samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=FALSE,colorByCluster=FALSE){
   pca <- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
   
   pcaImportanceDF <- pca %>%
@@ -272,18 +293,18 @@ samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=F
     theme(plot.title = element_text(hjust=0.5), legend.title = element_blank())
   
   pcaDF <- as_data_frame(pca$x,rownames = "Sample")
-  # Rest of the code remains the same up to the declaration of pcaDF
-
+  
+  # Code has not changed from the first couple plots up to here
     
   if (autoClustering) {
-    clusterNumber <- NULL
+    clusterNumber <- NULL # NULL is the value eclust prefers for automatic cluster optimization
   } else {
     clusterNumber <- clusters
   }
   
-  if (clusters != 1 || autoClustering) {
+  if (clusters != 1 || autoClustering) { # If either the user specifies a number of clusters or automatic clustering, then this part of code is triggered
     # Using factoextra's eclust to find clusters
-    pdf(NULL) # This is just to suppress the graphical output for the moment
+    pdf(NULL) # This is just to suppress the graphical output for the moment, but we wanna save this plot later
     eclustering <- factoextra::eclust(
       t(expressionMatrix),
       FUNcluster = "kmeans",
@@ -294,21 +315,25 @@ samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=F
     
     # Join the dataframe with the clustering information as a tibble
     pcaDF <- pcaDF %>% 
-      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster]))
+      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster])) # Notice I converted the clusters to letters instead of numbers. ggpairs can deal with this categorical data much better. Factors could also have been used but meh /shrug
     
     # Generating the grid plot with clusters for colors and samples for shapes
     
-    if (ncol(expressionMatrix)>6){
-      graphingParameters <- list(mapping=aes(shape=Cluster,col=Sample))
+    if (ncol(expressionMatrix)>6){ # This part is added because ggpairs allows up to 6 different shapes. Any more than that and the data points will disappear! Maybe in the future they'll implement a feature to increment them
+      graphingParameters <- list(mapping=aes(shape=Cluster,col=Sample)) # In such a case, we flip the shape and cluster parameters
     } else{
       graphingParameters <- list(mapping=aes(col=Cluster,shape=Sample))
     }
-  } else { # Here everything is as before adding the clustering feature
-    graphingParameters <- list(mapping=aes(col=Sample))
+  } else { 
+    if(colorByCluster){
+      graphingParameters <- list(mapping=aes(col=Cluster)) #User has a choice to color by cluster
+    } else{
+      graphingParameters <- list(mapping=aes(col=Sample))
+    }
   }
   
   graphingParameters <- c(
-    graphingParameters,
+    graphingParameters, # aes() parameters from the nested if's
     list(
       data=pcaDF,
       columns=1:numberOfPCs+2,
@@ -317,23 +342,28 @@ samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=F
       legend = c(2,1)
     )
   )
-  pcaPlot <- do.call(GGally::ggpairs,graphingParameters)
-  pcaPlot <- pcaPlot + theme_bw() +
+  
+  pcaPlot <- do.call(GGally::ggpairs,graphingParameters) # Generate the plot with these parameters
+  
+  # Add a few details:
+  pcaPlot <- pcaPlot + theme_bw() + 
     labs(title="Principal Components")+
     theme(plot.title=element_text(hjust=0.5))
   
-  
-  clusteringPlot <- eclustering$clust_plot + # Let's modify the clustering plot produced by eclustering 
+  # We also customize the clustering plot from eclust a little bit:
+  clusteringPlot <- eclustering$clust_plot + 
     theme_bw()+
     theme(plot.title = element_text(hjust = 0.5))
   
+  # And return them to the user!
   returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot, clusteringPlot = clusteringPlot)
   return(returnList)
   
 } # end of function
 ```
 
-Let's test it out on the airway dataset! First, no autoclustering
+Let's test it out on the airway dataset. First, no autoclustering and user-defined 2 clusters
+
 ```{r,cache=TRUE}
 airwayPCAPlots <- samplePCA(airwayMatrix,numberOfPCs = 3,clusters =2,autoClustering = FALSE)
 airwayPCAPlots$pcaPlot
@@ -349,7 +379,7 @@ airwayPCAPlots$pcaPlot
 airwayPCAPlots$clusteringPlot
 ```
 
-And a beautiful plot we get! Of couse this algorithm would be more useful for larger data sets, which is a topic for another day! For now, have a sneak peak at what it can do with a large enough data set (METABRIC breast cancer)
+And a beautiful plot we get indeed! Of couse this algorithm would be more useful for larger data sets, which is a topic for another day! For now, have a sneak peak at what it can do with a large enough data set (METABRIC breast cancer)
 
 ![PCA plot for the subset of Triple Negative tumors in the METABRIC dataset](/post/2018-03-28-pca-plots_files/PCA_TNBC.png)
 
