@@ -323,12 +323,12 @@ pcaImportanceDF
 ## 8  4 6.598758e-13 Cumulative 1.00000</code></pre>
 <p>So all I’ve done is merged (<code>gather</code>) the individual and cumulative columns into one. This is something ggplot can use more easily to generate two line graphs in the same window, so let’s do just that. I want the number of PC in the x axis and it’s importance on the y axis. Then I want two different line graphs (with points) to be produced based on whether it’s cumulative or individual</p>
 <pre class="r"><code>importancePlot &lt;- pcaImportanceDF %&gt;%
-    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+ 
-    theme_bw()+
-    geom_line()+ 
-    geom_point()+
-    labs(title=&quot;Importance of PCs&quot;,y=&quot;Percent of Variance explained&quot;)+ # Add nice labels and title
-    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank()) # Center title and remove legend title
+  ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+ 
+  theme_bw()+
+  geom_line()+ 
+  geom_point()+
+  labs(title=&quot;Importance of PCs&quot;,y=&quot;Percent of Variance explained&quot;)+ # Add nice labels and title
+  theme(plot.title = element_text(hjust=0.5), legend.title = element_blank()) # Center title and remove legend title
 
 importancePlot</code></pre>
 <p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-7-1.png" width="672" /> Beautiful!</p>
@@ -380,8 +380,8 @@ pcaPlot</code></pre>
     columns=1:numberOfPCs+1,
     mapping = aes(colour=Sample),
     upper=NULL,
-    legend = c(2,1)
-  )+theme_bw()+
+    legend = c(2,1))+
+    theme_bw()+
     labs(title=&quot;Principal Components&quot;)+
     theme(plot.title=element_text(hjust=0.5),legend.text=element_text(size=4))
   
@@ -414,38 +414,52 @@ airwayPCAPlots$importancePlot</code></pre>
   #Rest of the program here
 }</code></pre>
 <p>By doing this, if the user determines they want auto clustering, eclust will find the optimal number for us. Let’s keep going.</p>
-<pre class="r"><code>if (clusters != 1 || autoClustering) { # Case 1: If either the user specifies a number of clusters or automatic clustering, then this part of code is triggered
-    # Using factoextra&#39;s eclust to find clusters
-    pdf(NULL) # This is just to suppress the graphical output for the moment, but we wanna save this plot later
-    eclustering &lt;- factoextra::eclust(
-      t(expressionMatrix),
-      FUNcluster = &quot;kmeans&quot;,
-      k=clusterNumber,
-      k.max=min(10,nrow(t(expressionMatrix))-1)
-    )
-    dev.off()
-    
-    # Join the dataframe with the clustering information as a tibble
-    pcaDF &lt;- pcaDF %&gt;% 
-      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster])) # Notice I converted the clusters to letters instead of numbers. ggpairs can deal with this categorical data much better. Factors could also have been used but meh /shrug
-    
-    # Generating the grid plot with clusters for colors and samples for shapes
-    
-    if (ncol(expressionMatrix)&gt;6){ # This part is added because ggpairs allows up to 6 different shapes. Any more than that and the data points will disappear! Maybe in the future they&#39;ll implement a feature to increment them
-      graphingParameters &lt;- list(mapping=aes(shape=Cluster,col=Sample)) # In such a case, we flip the shape and cluster parameters
-    } else{
-      graphingParameters &lt;- list(mapping=aes(col=Cluster,shape=Sample))
-    }
-  } 
+<pre class="r"><code># Case 1: If either the user specifies a number of clusters or automatic clustering, then 
+# this part of code is triggered
+if (clusters != 1 || autoClustering) { 
+  # Using factoextra&#39;s eclust to find clusters
+  pdf(NULL) 
+  # This is just to suppress the graphical output for the moment, but we wanna save this plot later
+  eclustering &lt;- factoextra::eclust(
+    t(expressionMatrix),
+    FUNcluster = &quot;kmeans&quot;,
+    k=clusterNumber,
+    k.max=min(10,nrow(t(expressionMatrix))-1)
+  )
+  dev.off()
+  
+  # Join the dataframe with the clustering information as a tibble
+  pcaDF &lt;- pcaDF %&gt;% 
+    dplyr::right_join(dplyr::data_frame(
+      Sample=names(eclustering$cluster),
+      Cluster=LETTERS[eclustering$cluster]
+    )) 
+  # Notice I converted the clusters to letters instead of numbers. 
+  # ggpairs can deal with this categorical data much better. 
+  # Factors could also have been used but meh /shrug
+  
+  # Generating the grid plot with clusters for colors and samples for shapes
+  
+  # This part is added because ggpairs allows up to 6 different shapes
+  # Maybe in the future they&#39;ll implement a feature to increment them
+  # Any more than that and the data points will disappear! 
+  # In such a case, we flip the shape and cluster parameters
+  
+  if (ncol(expressionMatrix)&gt;6){ 
+    graphingParameters &lt;- list(mapping=aes(shape=Cluster,col=Sample)) 
+  } else{
+    graphingParameters &lt;- list(mapping=aes(col=Cluster,shape=Sample))
+  }
+} 
 
 
 else { # Case 2: User wants no clustering
-    if(colorByCluster){
-      graphingParameters &lt;- list(mapping=aes(col=Cluster)) # If the user prefers to 
-    } else{
-      graphingParameters &lt;- list(mapping=aes(col=Sample))
-    }
-  }</code></pre>
+  if(colorByCluster){
+    graphingParameters &lt;- list(mapping=aes(col=Cluster)) # If the user prefers to color clusters
+  } else{
+    graphingParameters &lt;- list(mapping=aes(col=Sample))
+  }
+}</code></pre>
 <p>Bunch of nested if’s, I know. I unfortunately don’t yet know a better way to do this. The logic is quite simple, however:</p>
 <ul>
 <li><p>We first check whether the user wants to cluster or not. If the user does not want to cluster, then they have the choice to color by cluster or sample. In the future I will make this a single argument (<code>colorBy</code> that allows for those options, but I don’t know how to do that right now).</p></li>
@@ -453,31 +467,31 @@ else { # Case 2: User wants no clustering
 </ul>
 <p>That practically completes the picture! All we’re missing is making the actual remaining plots with the remaining graphical parameters</p>
 <pre class="r"><code>graphingParameters &lt;- c(
-    graphingParameters, # aes() parameters from the nested if&#39;s
-    list(
-      data=pcaDF,
-      columns=1:numberOfPCs+2,
-      lower=list(continuous=GGally::wrap(&quot;points&quot;,size=3)),
-      upper=NULL,
-      legend = c(2,1)
-    )
+  graphingParameters, # aes() parameters from the nested if&#39;s
+  list(
+    data=pcaDF,
+    columns=1:numberOfPCs+2,
+    lower=list(continuous=GGally::wrap(&quot;points&quot;,size=3)),
+    upper=NULL,
+    legend = c(2,1)
   )
-  
-  pcaPlot &lt;- do.call(GGally::ggpairs,graphingParameters) # Generate the plot with these parameters
-  
-  # Add a few details:
-  pcaPlot &lt;- pcaPlot + theme_bw() + 
-    labs(title=&quot;Principal Components&quot;)+
-    theme(plot.title=element_text(hjust=0.5))
-  
-  # We also customize the clustering plot from eclust a little bit:
-  clusteringPlot &lt;- eclustering$clust_plot + 
-    theme_bw()+
-    theme(plot.title = element_text(hjust = 0.5))
-  
-  # And return them to the user!
-  returnList&lt;-list(importancePlot=importancePlot, pcaPlot=pcaPlot, clusteringPlot = clusteringPlot)
-  return(returnList)</code></pre>
+)
+
+pcaPlot &lt;- do.call(GGally::ggpairs,graphingParameters) # Generate the plot with these parameters
+
+# Add a few details:
+pcaPlot &lt;- pcaPlot + theme_bw() + 
+  labs(title=&quot;Principal Components&quot;)+
+  theme(plot.title=element_text(hjust=0.5))
+
+# We also customize the clustering plot from eclust a little bit:
+clusteringPlot &lt;- eclustering$clust_plot + 
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+# And return them to the user!
+returnList&lt;-list(importancePlot=importancePlot, pcaPlot=pcaPlot, clusteringPlot = clusteringPlot)
+return(returnList)</code></pre>
 <p>And that completes the function! In one block it looks like:</p>
 <p>Let’s test it out on the airway dataset. First, no autoclustering and user-defined 2 clusters</p>
 <pre class="r"><code>airwayPCAPlots &lt;- samplePCA(airwayMatrix,numberOfPCs = 3,clusters =2,autoClustering = FALSE)
