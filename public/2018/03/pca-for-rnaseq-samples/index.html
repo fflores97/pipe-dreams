@@ -1,0 +1,800 @@
+
+
+  
+    
+  
+
+
+  
+
+
+
+
+  
+
+
+  
+
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Hugo 0.37.1 with theme Tranquilpeak 0.4.3-BETA">
+    <title>PCA for RNASeq samples</title>
+    <meta name="author" content="Felipe Flores">
+    <meta name="keywords" content="">
+
+    <link rel="icon" href="/favicon.png">
+    
+
+    
+    <meta name="description" content="Beginning to analyze mRNA data Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.">
+    <meta property="og:description" content="Beginning to analyze mRNA data Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.">
+    <meta property="og:type" content="blog">
+    <meta property="og:title" content="PCA for RNASeq samples">
+    <meta property="og:url" content="/2018/03/pca-for-rnaseq-samples/">
+    <meta property="og:site_name" content="Pipe Dreams">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Pipe Dreams">
+    <meta name="twitter:description" content="Beginning to analyze mRNA data Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.">
+    
+    
+
+    
+    
+
+    
+      <meta property="og:image" content="//www.gravatar.com/avatar/47c188084d25ed759c5769119c4421b6?s=640">
+    
+
+    
+      <meta property="og:image" content="/post/2018-03-28-pca-plots_files/PCA_TNBC_thumbnail.png">
+    
+    
+      <meta property="og:image" content="/post/2018-03-28-pca-plots_files/PCA_TNBC_edit.png">
+    
+    
+
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/jquery.fancybox.min.css" integrity="sha256-vuXZ9LGmmwtjqFX1F+EKin1ThZMub58gKULUyf0qECk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/helpers/jquery.fancybox-thumbs.min.css" integrity="sha256-SEa4XYAHihTcEP1f5gARTB2K26Uk8PsndQYHQC1f4jU=" crossorigin="anonymous" />
+    
+    
+    <link rel="stylesheet" href="/css/style-jsjn0006wyhpyzivf6yceb31gvpjatbcs3qzjvlumobfnugccvobqwxnnaj8.min.css" />
+    
+    
+
+    
+      
+    
+    
+  </head>
+
+  <body>
+    <div id="blog">
+      <header id="header" data-behavior="2">
+  <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+  <div class="header-title">
+    <a class="header-title-link" href="/">Pipe Dreams</a>
+  </div>
+  
+    
+      <a class="header-right-picture "
+         href="/#about">
+    
+    
+    
+      
+        <img class="header-picture" src="//www.gravatar.com/avatar/47c188084d25ed759c5769119c4421b6?s=90" alt="Author&#39;s picture" />
+      
+    
+    </a>
+  
+</header>
+
+      <nav id="sidebar" data-behavior="2">
+  <div class="sidebar-container">
+    
+      <div class="sidebar-profile">
+        <a href="/#about">
+          <img class="sidebar-profile-picture" src="//www.gravatar.com/avatar/47c188084d25ed759c5769119c4421b6?s=110" alt="Author&#39;s picture" />
+        </a>
+        <h4 class="sidebar-profile-name">Felipe Flores</h4>
+        
+          <h5 class="sidebar-profile-bio">Pipe is short for Felipe in Spanish. Just my journey through the world of data analysis.</h5>
+        
+      </div>
+    
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+      
+      <span class="sidebar-button-desc">Home</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/categories">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+      
+      <span class="sidebar-button-desc">Categories</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/tags">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+      
+      <span class="sidebar-button-desc">Tags</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/archives">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+      
+      <span class="sidebar-button-desc">Archives</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/#about">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+      
+      <span class="sidebar-button-desc">About</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://github.com/fflores97">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-github"></i>
+      
+      <span class="sidebar-button-desc">GitHub</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/index.xml">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+      
+      <span class="sidebar-button-desc">RSS</span>
+    </a>
+  </li>
+
+
+    </ul>
+  </div>
+</nav>
+
+      
+  <div class="post-header-cover
+              text-left
+              "
+       style="background-image:url('/post/2018-03-28-pca-plots_files/PCA_TNBC_edit.png')"
+       data-behavior="2">
+    
+      <div class="post-header main-content-wrap text-left">
+  
+    <h1 class="post-title" itemprop="headline">
+      PCA for RNASeq samples
+    </h1>
+  
+  
+  <div class="postShorten-meta post-meta">
+    
+      <time itemprop="datePublished" datetime="2018-03-29T00:00:00Z">
+        
+  March 29, 2018
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="/categories/data-analysis-projects-r">Data Analysis Projects (R)</a>
+    
+  
+
+  </div>
+
+</div>
+    
+  </div>
+
+
+      <div id="main" data-behavior="2"
+        class="hasCover
+               hasCoverMetaIn
+               ">
+        <article class="post" itemscope itemType="http://schema.org/BlogPosting">
+          
+          
+          <div class="post-content markdown" itemprop="articleBody">
+            <div class="main-content-wrap">
+              <div id="beginning-to-analyze-mrna-data" class="section level1">
+<h1>Beginning to analyze mRNA data</h1>
+<p>Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment. I also wanted to use a tidy data paradigm as much as possible, but it is true that for many bioinformatics applications tidy data is rather cumbersome. Thus, after many hours of trial and error, I decided that all tidy data behavior for my projects will be embedded in my functions but the data will remain in standard data frames and matrix formats outside of them. Let’s go!</p>
+<div id="the-experiment" class="section level2">
+<h2>The experiment</h2>
+<p>In my first experiment, I had to analyze the effects of a Dox-inducible shRNA system against the NLGN4X gene in the SUM159 cell line. There are two shRNAs, so that means I have 4 samples: 2 controls and 2 dox-activated shRNA samples, and RNASeq alignment was done for me</p>
+</div>
+<div id="importing-and-processing-data" class="section level2">
+<h2>Importing and Processing Data</h2>
+<p>I may write a post another day on how alignment works and how to imported the aligned counts, but for now that’s already been done. We need two kinds of data frames. One of them has genes as rows and samples as columns. I named it <code>countsData</code> and it looks like this:</p>
+<pre class="r"><code>as_data_frame(countsData)
+## # A tibble: 18,257 x 4
+##    SUM159.shNLGN4X.1… SUM159.shNLGN4X.… SUM159.shNLGN4X.… SUM159.shNLGN4X…
+##  *              &lt;int&gt;             &lt;int&gt;             &lt;int&gt;            &lt;int&gt;
+##  1                335               330               390              580
+##  2                105                65                60               41
+##  3                  5                 6                 2               10
+##  4                 23                21                22               13
+##  5                 15                 5                 9              277
+##  6                  6                 7                 4                5
+##  7                  3                 0                 6                3
+##  8               2960              1658              2612             2192
+##  9               5215              5231              3900             2482
+## 10               8588              6479              7707             5115
+## # ... with 18,247 more rows</code></pre>
+<p>The other one contains meta data about the experiment. For instance, whether the cells were treated with DOX or not, etc. This <code>metaData</code> looks like this</p>
+<pre class="r"><code>as_data_frame(metaData)
+## # A tibble: 4 x 7
+##   Sample         Treatment Hairpin Cell_Line Color  Subtype Sample_name   
+##   &lt;fct&gt;          &lt;fct&gt;       &lt;int&gt; &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;   &lt;fct&gt;         
+## 1 SUM159.shNLGN… dox_minus       1 SUM159    #5a14… Basal   SUM159_sh1-DO…
+## 2 SUM159.shNLGN… dox_plus        1 SUM159    #d50f… Basal   SUM159_sh1-DO…
+## 3 SUM159.shNLGN… dox_minus       2 SUM159    #3454… Basal   SUM159_sh2-DO…
+## 4 SUM159.shNLGN… dox_plus        2 SUM159    #ff00… Basal   SUM159_sh2-DO…</code></pre>
+<p>Once the data is imported into R, we can tell our friendly DESeq package to convert it into a more versatile format. I’ve chosen <code>design = ~Treatment</code> because I’m interested in seeing the effect of inducing the shRNA by DOX</p>
+<pre class="r"><code>dds &lt;- DESeqDataSetFromMatrix(countData = countsData,colData=metaData,design = ~ Treatment)
+dds &lt;- estimateSizeFactors(dds)
+vsd &lt;- varianceStabilizingTransformation(dds, blind=FALSE)</code></pre>
+<hr>
+</hr>
+</div>
+</div>
+<div id="pca-function" class="section level1">
+<h1>PCA Function</h1>
+<div id="visualizing-importance-of-pcs" class="section level2">
+<h2>Visualizing Importance of PCs</h2>
+<p>So let’s say I have a matrix <code>expressionMatrix</code> that represents gene expression, with genes as rows and samples as columns; I’m interested in the PCA of the samples taking all genes into account. Importantly, I would expect one of the major principal components to cluster controls (no DOX) vs shRNA-induced cells. My function should do the following:</p>
+<ul>
+<li>Require an expression matrix as input</li>
+<li>Run PCA and display the percentage of variance explained by each PC</li>
+<li>Plot however many pairs of the main PCs I want to see (generalizable to <span class="math inline">\(n\)</span> number of samples)</li>
+</ul>
+<p>So let’s do it! User input would be the expression matrix itself and the number of PC plots to display. Since I’m interested in the PCA of samples, I will transpose my expression matrix before feeding it to R’s <code>prcomp</code>. Let’s use the airway dataset for demonstration. I first need to obtain a variance-stabilized data matrix following the procedure outlined <a href="https://bioconductor.org/help/workflows/rnaseqGene/">here</a></p>
+<p>Now that’s done most of the work for me. Now it’s a thing of getting it to display the information I want. So first of all I care about the importance of (or variance explained by) each PC, both individually and cumulatively. Conveniently, <code>broom</code> has a function that will make tidy data out of the <code>prcomp</code> object from the first part</p>
+<pre class="r"><code>pca %&gt;% 
+  broom::tidy(matrix=&quot;pcs&quot;)
+##   PC      std.dev percent cumulative
+## 1  1 9.096660e+01 0.45325    0.45325
+## 2  2 8.970461e+01 0.44076    0.89400
+## 3  3 4.399045e+01 0.10600    1.00000
+## 4  4 6.598758e-13 0.00000    1.00000</code></pre>
+<p>Beautiful! The <code>&quot;pcs&quot;</code> argument will give me information about the components themselves, not the samples, which is exactly what we need for this part. Now let’s edit it slightly so the plot will look nice</p>
+<pre class="r"><code>pcaImportanceDF &lt;- pca %&gt;%
+  broom::tidy(matrix=&quot;pcs&quot;) %&gt;%
+  dplyr::rename(Individual=percent,Cumulative=cumulative) %&gt;%
+  tidyr::gather(key,value,Individual,Cumulative)
+
+pcaImportanceDF
+##   PC      std.dev        key   value
+## 1  1 9.096660e+01 Individual 0.45325
+## 2  2 8.970461e+01 Individual 0.44076
+## 3  3 4.399045e+01 Individual 0.10600
+## 4  4 6.598758e-13 Individual 0.00000
+## 5  1 9.096660e+01 Cumulative 0.45325
+## 6  2 8.970461e+01 Cumulative 0.89400
+## 7  3 4.399045e+01 Cumulative 1.00000
+## 8  4 6.598758e-13 Cumulative 1.00000</code></pre>
+<p>So all I’ve done is merged (<code>gather</code>) the individual and cumulative columns into one. This is something ggplot can use more easily to generate two line graphs in the same window, so let’s do just that. I want the number of PC in the x axis and it’s importance on the y axis. Then I want two different line graphs (with points) to be produced based on whether it’s cumulative or individual</p>
+<pre class="r"><code>importancePlot &lt;- pcaImportanceDF %&gt;%
+    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+ 
+    theme_bw()+
+    geom_line()+ 
+    geom_point()+
+    labs(title=&quot;Importance of PCs&quot;,y=&quot;Percent of Variance explained&quot;)+ # Add nice labels and title
+    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank()) # Center title and remove legend title
+
+importancePlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-7-1.png" width="672" /> Beautiful!</p>
+</div>
+<div id="visualizing-samples-on-pc-plots" class="section level2">
+<h2>Visualizing samples on PC plots</h2>
+<p>What I want is a function that will be generalizable to any number of PC pairs I desire. In the code my lab used, PC plots were done by hand up to 3 plots. It was a rather tedious process to add an extra one, so I want generalizability. For that, I quite like <code>GGally</code>’s ggpairs. First of all let’s visualize the output of <code>prcomp$x</code></p>
+<pre class="r"><code>pcaDF &lt;- as_data_frame(pca$x,rownames = &quot;Sample&quot;)
+
+pcaDF
+## # A tibble: 4 x 5
+##   Sample                         PC1    PC2    PC3      PC4
+##   &lt;chr&gt;                        &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+## 1 SUM159.shNLGN4X.1_DOX.minus  -66.4   42.0 -53.9  5.80e-13
+## 2 SUM159.shNLGN4X.1_DOX.plus   124.    56.9   2.02 5.66e-13
+## 3 SUM159.shNLGN4X.2_DOX.minus  -70.5   34.9  53.8  5.39e-13
+## 4 SUM159.shNLGN4X.2_DOX.plus    13.3 -134.   -2.00 5.52e-13</code></pre>
+<p>This is exactly what I need! Go <code>prcomp</code>! All I have to do now is tell <code>ggrid</code> to plot these in a grid. I don’t particularly like redundant plots so I’ll just do the bottom half of the grid. This is also where I get the freedom to include as many PCs as I want. The sample will also give them color</p>
+<pre class="r"><code>numberOfPCs &lt;- 3
+pcaPlot &lt;- GGally::ggpairs(data=pcaDF,columns=1:numberOfPCs+1,mapping = aes(colour=Sample),upper=NULL,legend = c(1,1))+
+  theme_bw()+
+  labs(title=&quot;Principal Components&quot;)+
+  theme(plot.title=element_text(hjust=0.5),legend.text=element_text(size=4))
+
+pcaPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Gorgeous! Let’s put it all together into a function that returns a list with both plots</p>
+<pre class="r"><code>samplePCA&lt;-function(expressionMatrix,numberOfPCs=2){
+  
+  pca &lt;- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
+  
+  pcaImportanceDF &lt;- pca %&gt;%
+    broom::tidy(matrix=&quot;pcs&quot;) %&gt;%
+    dplyr::rename(.,Individual=percent,Cumulative=cumulative) %&gt;%
+    tidyr::gather(key,value,Individual,Cumulative)
+  
+  importancePlot &lt;- pcaImportanceDF %&gt;%
+    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+
+    theme_bw()+
+    geom_line()+
+    geom_point()+
+    labs(title=&quot;Importance of PCs&quot;,y=&quot;Percent of Variance explained&quot;)+
+    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank())
+  
+  pcaDF &lt;- as_data_frame(pca$x,rownames = &quot;Sample&quot;)
+  
+  pcaPlot &lt;- GGally::ggpairs(
+    data=pcaDF,
+    columns=1:numberOfPCs+1,
+    mapping = aes(colour=Sample),
+    upper=NULL,
+    legend = c(2,1)
+  )+theme_bw()+
+    labs(title=&quot;Principal Components&quot;)+
+    theme(plot.title=element_text(hjust=0.5),legend.text=element_text(size=4))
+  
+  returnList&lt;-list(importancePlot=importancePlot, pcaPlot=pcaPlot)
+  return(returnList)
+}</code></pre>
+<p>Let’s test it on the <code>airway</code> dataset</p>
+<pre class="r"><code>data(airway)
+airwayMatrix &lt;- assay(airway)
+airwayMatrix &lt;- airwayMatrix[which(apply(t(airwayMatrix),2,var)!=0),] # Remove all variance 0 values so PCA doesn&#39;t give us an error
+airwayPCAPlots &lt;- samplePCA(airwayMatrix)
+airwayPCAPlots$importancePlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>airwayPCAPlots$pcaPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<p>At this point I’m pretty happy with the results. However, why not add an extra couple lines that will allow me to do some clustering while we’re at it.</p>
+</div>
+<div id="addition-of-clustering-feature" class="section level2">
+<h2>Addition of clustering feature</h2>
+<p>Let’s add an extra argument to the function and use factoextra’s <code>eclust</code></p>
+<pre class="r"><code>samplePCA &lt;- function(expressionMatrix,numberOfPCs=2,clusters=0,autoClustering=FALSE){
+  
+  # Rest of the code remains the same up to the declaration of pcaDF
+  if (autoClustering) {
+    clusterNumber &lt;- NULL
+  } else{
+    clusterNumber=0
+  }
+  
+  #Rest of the program here
+}</code></pre>
+<p>By doing this, if the user determines they want auto clustering, eclust will find the optimal number for us. Let’s keep going.</p>
+<pre class="r"><code># Rest of the code remains the same up to the declaration of pcaDF
+  if (autoClustering) {
+    clusterNumber &lt;- NULL
+  } else{
+    clusterNumber=0
+  }
+
+  if (clusters != 0) {
+    # Using factoextra&#39;s eclust to find clusters
+    eclustering &lt;- factoextra::eclust(
+      t(expressionMatrix),
+      FUNcluster = &quot;kmeans&quot;,
+      k=clusterNumber,
+      k.max=min(10,nrow(t(expressionMatrix)))
+    ) 
+    
+    # Join the dataframe with the clustering information as a tibble
+    pcaDF &lt;- pcaDF %&gt;% 
+      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster]))
+    
+    # Generating the grid plot with clusters for colors and samples for shapes
+    pcaPlot &lt;- GGally::ggpairs(
+      data=pcaDF,
+      columns=1:numberOfPCs+2, # Note that we have to add an extra column
+      mapping = aes(col=Cluster,shape=Sample), # Changed aesthetics to add cluster information
+      lower=list(continuous=GGally::wrap(&quot;points&quot;,size=3)),
+      upper=NULL,
+      legend = c(2,1)
+    )
+    
+  } else { # Here everything is as before adding the clustering feature
+    pcaPlot &lt;- GGally::ggpairs(
+      data=pcaDF,
+      columns=1:numberOfPCs+1,
+      mapping = aes(col=Sample),
+      lower=list(continuous=GGally::wrap(&quot;points&quot;,size=3)),
+      upper=NULL,
+      legend = c(2,1)
+    )
+  }
+  
+  pcaPlot&lt;- pcaPlot + theme_bw() +
+    labs(title=&quot;Principal Components&quot;)+
+    theme(plot.title=element_text(hjust=0.5))
+  
+  returnList&lt;-list(importancePlot=importancePlot, pcaPlot=pcaPlot)
+  return(returnList)
+  
+} # end of function</code></pre>
+<p>Let’s test it out on the airway dataset! First, no autoclustering</p>
+<pre class="r"><code>airwayPCAPlots &lt;- samplePCA(airwayMatrix,numberOfPCs = 3,clusters =2,autoClustering = FALSE)
+## Joining, by = &quot;Sample&quot;
+airwayPCAPlots$pcaPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>airwayPCAPlots$clusteringPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
+<p>Beautiful! Next let’s see the autoclustering</p>
+<pre class="r"><code>airwayPCAPlots &lt;- samplePCA(airwayMatrix,numberOfPCs = 3,autoClustering = TRUE)
+## Joining, by = &quot;Sample&quot;
+airwayPCAPlots$pcaPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code>airwayPCAPlots$clusteringPlot</code></pre>
+<p><img src="/post/2018-03-28-pca-plots_files/figure-html/unnamed-chunk-16-2.png" width="672" /></p>
+<p>And a beautiful plot we get! Of couse this algorithm would be more useful for larger data sets, which is a topic for another day! For now, have a sneak peak at what it can do with a large enough data set (METABRIC breast cancer)</p>
+<div class="figure">
+<img src="/post/2018-03-28-pca-plots_files/PCA_TNBC.png" alt="PCA plot for the subset of Triple Negative tumors in the METABRIC dataset" />
+<p class="caption">PCA plot for the subset of Triple Negative tumors in the METABRIC dataset</p>
+</div>
+<hr>
+</hr>
+</div>
+</div>
+<div id="closing-thoughts" class="section level1">
+<h1>Closing thoughts</h1>
+<p>My motivation for writing this function is that it will be implemented in a future project (Shiny web app!), so it needs to generalize to all sorts of inputs. Pretty happy with my progress starting this blog! My apologies for how long it got. But hey, it’s quite functional!</p>
+</div>
+
+              
+            </div>
+          </div>
+          <div id="post-footer" class="post-footer main-content-wrap">
+            
+              
+                
+                
+                  <div class="post-footer-tags">
+                    <span class="text-color-light text-small">TAGGED IN</span><br/>
+                    
+  <a class="tag tag--primary tag--small" href="/tags/pca/">PCA</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/plot/">Plot</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/r/">R</a>
+
+                  </div>
+                
+              
+            
+            
+  <div class="post-actions-wrap">
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/pipeflores97%25!%28EXTRA%20string=/2018/03/pca-for-rnaseq-samples/%29">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+
+            
+              
+                <div id="disqus_thread">
+  <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+              
+            
+          </div>
+        </article>
+        <footer id="footer" class="main-content-wrap">
+  <span class="copyrights">
+    &copy; 2018 Felipe Flores. All Rights Reserved
+  </span>
+</footer>
+
+      </div>
+      <div id="bottom-bar" class="post-bottom-bar" data-behavior="2">
+        
+  <div class="post-actions-wrap">
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/pipeflores97%25!%28EXTRA%20string=/2018/03/pca-for-rnaseq-samples/%29">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+
+      </div>
+      <div id="share-options-bar" class="share-options-bar" data-behavior="2">
+  <i id="btn-close-shareoptions" class="fa fa-close"></i>
+  <ul class="share-options">
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://twitter.com/pipeflores97%25!%28EXTRA%20string=%2F2018%2F03%2Fpca-for-rnaseq-samples%2F%29">
+          <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+    </div>
+    
+    <div id="about">
+  <div id="about-card">
+    <div id="about-btn-close">
+      <i class="fa fa-remove"></i>
+    </div>
+    
+      <img id="about-card-picture" src="//www.gravatar.com/avatar/47c188084d25ed759c5769119c4421b6?s=110" alt="Author&#39;s picture" />
+    
+    <h4 id="about-card-name">Felipe Flores</h4>
+    
+      <div id="about-card-bio">Pipe is short for Felipe in Spanish. Just my journey through the world of data analysis.</div>
+    
+    
+      <div id="about-card-job">
+        <i class="fa fa-briefcase"></i>
+        <br/>
+        Undergraduate student
+      </div>
+    
+    
+      <div id="about-card-location">
+        <i class="fa fa-map-marker"></i>
+        <br/>
+        Cambridge, MA. Santiago, Chile
+      </div>
+    
+  </div>
+</div>
+
+    <div id="algolia-search-modal" class="modal-container">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="close-button"><i class="fa fa-close"></i></span>
+      <a href="https://algolia.com" target="_blank" rel="noopener" class="searchby-algolia text-color-light link-unstyled">
+        <span class="searchby-algolia-text text-color-light text-small">by</span>
+        <img class="searchby-algolia-logo" src="https://www.algolia.com/static_assets/images/press/downloads/algolia-light.svg">
+      </a>
+      <i class="search-icon fa fa-search"></i>
+      <form id="algolia-search-form">
+        <input type="text" id="algolia-search-input" name="search"
+          class="form-control input--large search-input" placeholder="Search" />
+      </form>
+    </div>
+    <div class="modal-body">
+      <div class="no-result text-color-light text-center">no post found</div>
+      <div class="results">
+        
+        
+          <div class="media">
+            
+            <div class="media-body">
+              <a class="link-unstyled" href="/2018/03/pca-for-rnaseq-samples/">
+                <h3 class="media-heading">PCA for RNASeq samples</h3>
+              </a>
+              <span class="media-meta">
+                <span class="media-date text-small">
+                  Mar 3, 2018
+                </span>
+              </span>
+              <div class="media-content hide-xs font-merryweather">Beginning to analyze mRNA data Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.</div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr>
+          </div>
+        
+      </div>
+    </div>
+    <div class="modal-footer">
+      <p class="results-count text-medium"
+         data-message-zero="no post found"
+         data-message-one="1 post found"
+         data-message-other="{n} posts found">
+         1 posts found
+      </p>
+    </div>
+  </div>
+</div>
+    
+  
+    
+    <div id="cover" style="background-image:url('/images/chile.jpg');"></div>
+  
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.7/js/jquery.fancybox.min.js" integrity="sha256-GEAnjcTqVP+vBp3SSc8bEDQqvWAZMiHyUSIorrWwH50=" crossorigin="anonymous"></script>
+
+
+<script src="/js/script-qi9wbxp2ya2j6p7wx1i6tgavftewndznf4v0hy2gvivk1rxgc3lm7njqb6bz.min.js"></script>
+
+
+
+<script>
+$(document).ready(function() {
+  hljs.configure({ classPrefix: '', useBR: false });
+  $('pre.code-highlight > code, pre > code').each(function(i, block) {
+    if (!$(this).hasClass('codeblock')) {
+      $(this).addClass('codeblock');
+    }
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+
+
+  
+    
+      <script>
+        var disqus_config = function () {
+          this.page.url = '\/2018\/03\/pca-for-rnaseq-samples\/';
+          
+            this.page.identifier = '\/2018\/03\/pca-for-rnaseq-samples\/'
+          
+        };
+        (function() {
+          
+          
+          if (window.location.hostname == "localhost") {
+            return;
+          }
+          var d = document, s = d.createElement('script');
+          var disqus_shortname = 'pipedreams-1';
+          s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    
+  
+
+
+
+    
+  </body>
+</html>
+

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Pipe Dreams</title>
+    <link>/categories/</link>
+    <description>Recent content in Categories on Pipe Dreams</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Data Analysis Projects R</title>
+      <link>/categories/data-analysis-projects-r/</link>
+      <pubDate>Thu, 29 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/data-analysis-projects-r/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,361 @@
+---
+title: PCA for RNASeq samples
+author: Felipe Flores
+date: '2018-03-29'
+categories:
+  - Data Analysis Projects (R)
+tags:
+  - PCA
+  - Plot
+  - R
+thumbnailImage: post/2018-03-28-pca-plots_files/PCA_TNBC_thumbnail.png
+thumbnailImagePosition: left
+coverImage: /post/2018-03-28-pca-plots_files/PCA_TNBC_edit.png
+summary: >
+  Join me on my first adventure into documenting my data analysis work and learning!
+
+---
+
+```{r setup, include=FALSE,echo=FALSE,cache=FALSE}
+library(tidyverse)
+library(factoextra)
+library(DESeq2)
+library(airway)
+countsData<-read.csv("~/Dropbox (Partners HealthCare)/DFCI_Rotation_Students-Bojana-Polyak-Lab/2017_Felipe_Flores_and_Nick_Harper/SUM159_NLGN4_RNAseq_Analysis_Felipe/shNLGN4X-combined-gene-level-counts.csv",header=T,row.names = 1,stringsAsFactors = F)
+countsData<-countsData[rowSums(countsData)>10,]
+metaData<-read.csv("~/Dropbox (Partners HealthCare)/DFCI_Rotation_Students-Bojana-Polyak-Lab/2017_Felipe_Flores_and_Nick_Harper/SUM159_NLGN4_RNAseq_Analysis_Felipe/infoTable.csv",header=T)
+dds <- DESeqDataSetFromMatrix(countData = countsData,colData=metaData,design = ~ Treatment)
+dds <- estimateSizeFactors(dds)
+vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
+expressionMatrix<-assay(vsd)
+
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+
+
+# Beginning to analyze mRNA data
+
+Once of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment. I also wanted to use a tidy data paradigm as much as possible, but it is true that for many bioinformatics applications tidy data is rather cumbersome. Thus, after many hours of trial and error, I decided that all tidy data behavior for my projects will be embedded in my functions but the data will remain in standard data frames and matrix formats outside of them. Let's go!
+
+## The experiment
+In my first experiment, I had to analyze the effects of a Dox-inducible shRNA system against the NLGN4X gene in the SUM159 cell line. There are two shRNAs, so that means I have 4 samples: 2 controls and 2 dox-activated shRNA samples, and RNASeq alignment was done for me
+
+## Importing and Processing Data
+
+I may write a post another day on how alignment works and how to imported the aligned counts, but for now that's already been done. We need two kinds of data frames. One of them has genes as rows and samples as columns. I named it `countsData` and it looks like this:
+
+```{r , include=TRUE}
+as_data_frame(countsData)
+```
+
+The other one contains meta data about the experiment. For instance, whether the cells were treated with DOX or not, etc. This `metaData` looks like this
+```{r}
+as_data_frame(metaData)
+```
+
+Once the data is imported into R, we can tell our friendly DESeq package to convert it into a more versatile format. I've chosen `design = ~Treatment` because I'm interested in seeing the effect of inducing the shRNA by DOX
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = countsData,colData=metaData,design = ~ Treatment)
+dds <- estimateSizeFactors(dds)
+vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
+```
+
+<hr></hr>
+
+# PCA Function
+
+## Visualizing Importance of PCs
+
+So let's say I have a matrix `expressionMatrix` that represents gene expression, with genes as rows and samples as columns; I'm interested in the PCA of the samples taking all genes into account. Importantly, I would expect one of the major principal components to cluster controls (no DOX) vs shRNA-induced cells. My function should do the following:
+
+* Require an expression matrix as input
+* Run PCA and display the percentage of variance explained by each PC
+* Plot however many pairs of the main PCs I want to see (generalizable to $n$ number of samples)
+
+So let's do it! User input would be the expression matrix itself and the number of PC plots to display. Since I'm interested in the PCA of samples, I will transpose my expression matrix before feeding it to R's `prcomp`. Let's use the airway dataset for demonstration. I first need to obtain a variance-stabilized data matrix following the procedure outlined [here](https://bioconductor.org/help/workflows/rnaseqGene/)
+
+```{r,include=FALSE,echo=TRUE,cache=TRUE}
+expressionMatrix <- assay(vsd)
+pca <- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
+```
+
+Now that's done most of the work for me. Now it's a thing of getting it to display the information I want. So first of all I care about the importance of (or variance explained by) each PC, both individually and cumulatively. Conveniently, `broom` has a function that will make tidy data out of the `prcomp` object from the first part
+
+```{r}
+pca %>% 
+  broom::tidy(matrix="pcs")
+```
+Beautiful! The `"pcs"` argument will give me information about the components themselves, not the samples, which is exactly what we need for this part. Now let's edit it slightly so the plot will look nice
+```{r}
+pcaImportanceDF <- pca %>%
+  broom::tidy(matrix="pcs") %>%
+  dplyr::rename(Individual=percent,Cumulative=cumulative) %>%
+  tidyr::gather(key,value,Individual,Cumulative)
+
+pcaImportanceDF
+```
+
+So all I've done is merged (`gather`) the individual and cumulative columns into one. This is something ggplot can use more easily to generate two line graphs in the same window, so let's do just that. I want the number of PC in the x axis and it's importance on the y axis. Then I want two different line graphs (with points) to be produced based on whether it's cumulative or individual
+```{r}
+importancePlot <- pcaImportanceDF %>%
+    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+ 
+    theme_bw()+
+    geom_line()+ 
+    geom_point()+
+    labs(title="Importance of PCs",y="Percent of Variance explained")+ # Add nice labels and title
+    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank()) # Center title and remove legend title
+
+importancePlot
+```
+Beautiful! 
+
+## Visualizing samples on PC plots
+
+What I want is a function that will be generalizable to any number of PC pairs I desire. In the code my lab used, PC plots were done by hand up to 3 plots. It was a rather tedious process to add an extra one, so I want generalizability. For that, I quite like `GGally`'s ggpairs. First of all let's visualize the output of `prcomp$x`
+
+```{r}
+pcaDF <- as_data_frame(pca$x,rownames = "Sample")
+
+pcaDF
+```
+This is exactly what I need! Go `prcomp`! All I have to do now is tell `ggrid` to plot these in a grid. I don't particularly like redundant plots so I'll just do the bottom half of the grid. This is also where I get the freedom to include as many PCs as I want. The sample will also give them color
+```{r}
+numberOfPCs <- 3
+pcaPlot <- GGally::ggpairs(data=pcaDF,columns=1:numberOfPCs+1,mapping = aes(colour=Sample),upper=NULL,legend = c(1,1))+
+  theme_bw()+
+  labs(title="Principal Components")+
+  theme(plot.title=element_text(hjust=0.5),legend.text=element_text(size=4))
+
+pcaPlot
+```
+
+Gorgeous! Let's put it all together into a function that returns a list with both plots
+
+```{r}
+samplePCA<-function(expressionMatrix,numberOfPCs=2){
+  
+  pca <- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
+  
+  pcaImportanceDF <- pca %>%
+    broom::tidy(matrix="pcs") %>%
+    dplyr::rename(.,Individual=percent,Cumulative=cumulative) %>%
+    tidyr::gather(key,value,Individual,Cumulative)
+  
+  importancePlot <- pcaImportanceDF %>%
+    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+
+    theme_bw()+
+    geom_line()+
+    geom_point()+
+    labs(title="Importance of PCs",y="Percent of Variance explained")+
+    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank())
+  
+  pcaDF <- as_data_frame(pca$x,rownames = "Sample")
+  
+  pcaPlot <- GGally::ggpairs(
+    data=pcaDF,
+    columns=1:numberOfPCs+1,
+    mapping = aes(colour=Sample),
+    upper=NULL,
+    legend = c(2,1)
+  )+theme_bw()+
+    labs(title="Principal Components")+
+    theme(plot.title=element_text(hjust=0.5),legend.text=element_text(size=4))
+  
+  returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot)
+  return(returnList)
+}
+```
+
+Let's test it on the `airway` dataset
+
+```{r}
+data(airway)
+airwayMatrix <- assay(airway)
+airwayMatrix <- airwayMatrix[which(apply(t(airwayMatrix),2,var)!=0),] # Remove all variance 0 values so PCA doesn't give us an error
+airwayPCAPlots <- samplePCA(airwayMatrix)
+airwayPCAPlots$importancePlot
+airwayPCAPlots$pcaPlot
+
+```
+
+
+At this point I'm pretty happy with the results. However, why not add an extra couple lines that will allow me to do some clustering while we're at it. 
+
+## Addition of clustering feature
+
+Let's add an extra argument to the function and use factoextra's `eclust`
+
+```{r,eval=FALSE}
+samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=0,autoClustering=FALSE){
+  
+  # Rest of the code remains the same up to the declaration of pcaDF
+  if (autoClustering) {
+    clusterNumber <- NULL
+  } else{
+    clusterNumber=0
+  }
+  
+  #Rest of the program here
+}
+```
+By doing this, if the user determines they want auto clustering, eclust will find the optimal number for us. Let's keep going.
+
+```{r eval=FALSE}
+# Rest of the code remains the same up to the declaration of pcaDF
+  if (autoClustering) {
+    clusterNumber <- NULL
+  } else{
+    clusterNumber=0
+  }
+
+  if (clusters != 0) {
+    # Using factoextra's eclust to find clusters
+    eclustering <- factoextra::eclust(
+      t(expressionMatrix),
+      FUNcluster = "kmeans",
+      k=clusterNumber,
+      k.max=min(10,nrow(t(expressionMatrix)))
+    ) 
+    
+    # Join the dataframe with the clustering information as a tibble
+    pcaDF <- pcaDF %>% 
+      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster]))
+    
+    # Generating the grid plot with clusters for colors and samples for shapes
+    pcaPlot <- GGally::ggpairs(
+      data=pcaDF,
+      columns=1:numberOfPCs+2, # Note that we have to add an extra column
+      mapping = aes(col=Cluster,shape=Sample), # Changed aesthetics to add cluster information
+      lower=list(continuous=GGally::wrap("points",size=3)),
+      upper=NULL,
+      legend = c(2,1)
+    )
+    
+  } else { # Here everything is as before adding the clustering feature
+    pcaPlot <- GGally::ggpairs(
+      data=pcaDF,
+      columns=1:numberOfPCs+1,
+      mapping = aes(col=Sample),
+      lower=list(continuous=GGally::wrap("points",size=3)),
+      upper=NULL,
+      legend = c(2,1)
+    )
+  }
+  
+  pcaPlot<- pcaPlot + theme_bw() +
+    labs(title="Principal Components")+
+    theme(plot.title=element_text(hjust=0.5))
+  
+  returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot)
+  return(returnList)
+  
+} # end of function
+```
+
+```{r,include=FALSE,echo=FALSE}
+samplePCA <- function(expressionMatrix,numberOfPCs=2,clusters=1,autoClustering=FALSE){
+  pca <- stats::prcomp(t(expressionMatrix),center=TRUE,scale=TRUE)
+  
+  pcaImportanceDF <- pca %>%
+    broom::tidy(matrix="pcs") %>%
+    dplyr::rename(.,Individual=percent,Cumulative=cumulative) %>%
+    tidyr::gather(key,value,Individual,Cumulative)
+  
+  importancePlot <- pcaImportanceDF %>%
+    ggplot2::ggplot(aes(x=PC,y=value,group=key,color=key))+
+    theme_bw()+
+    geom_line()+
+    geom_point()+
+    labs(title="Importance of PCs",y="Percent of Variance explained")+
+    theme(plot.title = element_text(hjust=0.5), legend.title = element_blank())
+  
+  pcaDF <- as_data_frame(pca$x,rownames = "Sample")
+  # Rest of the code remains the same up to the declaration of pcaDF
+
+    
+  if (autoClustering) {
+    clusterNumber <- NULL
+  } else {
+    clusterNumber <- clusters
+  }
+  
+  if (clusters != 1 || autoClustering) {
+    # Using factoextra's eclust to find clusters
+    pdf(NULL) # This is just to suppress the graphical output for the moment
+    eclustering <- factoextra::eclust(
+      t(expressionMatrix),
+      FUNcluster = "kmeans",
+      k=clusterNumber,
+      k.max=min(10,nrow(t(expressionMatrix))-1)
+    )
+    dev.off()
+    
+    # Join the dataframe with the clustering information as a tibble
+    pcaDF <- pcaDF %>% 
+      dplyr::right_join(dplyr::data_frame(Sample=names(eclustering$cluster),Cluster=LETTERS[eclustering$cluster]))
+    
+    # Generating the grid plot with clusters for colors and samples for shapes
+    
+    if (ncol(expressionMatrix)>6){
+      graphingParameters <- list(mapping=aes(shape=Cluster,col=Sample))
+    } else{
+      graphingParameters <- list(mapping=aes(col=Cluster,shape=Sample))
+    }
+  } else { # Here everything is as before adding the clustering feature
+    graphingParameters <- list(mapping=aes(col=Sample))
+  }
+  
+  graphingParameters <- c(
+    graphingParameters,
+    list(
+      data=pcaDF,
+      columns=1:numberOfPCs+2,
+      lower=list(continuous=GGally::wrap("points",size=3)),
+      upper=NULL,
+      legend = c(2,1)
+    )
+  )
+  pcaPlot <- do.call(GGally::ggpairs,graphingParameters)
+  pcaPlot <- pcaPlot + theme_bw() +
+    labs(title="Principal Components")+
+    theme(plot.title=element_text(hjust=0.5))
+  
+  
+  clusteringPlot <- eclustering$clust_plot + # Let's modify the clustering plot produced by eclustering 
+    theme_bw()+
+    theme(plot.title = element_text(hjust = 0.5))
+  
+  returnList<-list(importancePlot=importancePlot, pcaPlot=pcaPlot, clusteringPlot = clusteringPlot)
+  return(returnList)
+  
+} # end of function
+```
+
+Let's test it out on the airway dataset! First, no autoclustering
+```{r,cache=TRUE}
+airwayPCAPlots <- samplePCA(airwayMatrix,numberOfPCs = 3,clusters =2,autoClustering = FALSE)
+airwayPCAPlots$pcaPlot
+airwayPCAPlots$clusteringPlot
+```
+
+
+Beautiful! Next let's see the autoclustering
+
+```{r,cache=TRUE}
+airwayPCAPlots <- samplePCA(airwayMatrix,numberOfPCs = 3,autoClustering = TRUE)
+airwayPCAPlots$pcaPlot
+airwayPCAPlots$clusteringPlot
+```
+
+And a beautiful plot we get! Of couse this algorithm would be more useful for larger data sets, which is a topic for another day! For now, have a sneak peak at what it can do with a large enough data set (METABRIC breast cancer)
+
+![PCA plot for the subset of Triple Negative tumors in the METABRIC dataset](/post/2018-03-28-pca-plots_files/PCA_TNBC.png)
+
+<hr></hr>
+
+# Closing thoughts
+
+My motivation for writing this function is that it will be implemented in a future project (Shiny web app!), so it needs to generalize to all sorts of inputs. Pretty happy with my progress starting this blog! My apologies for how long it got. But hey, it's quite functional!
+
