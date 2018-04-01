@@ -32,7 +32,7 @@ canonifyurls = true
 
 [author]
   name = "Felipe Flores"
-  bio = "Pipe is short for Felipe in Spanish. Just my journey through the world of data analysis."
+  bio = "Pipe is short for Felipe in Spanish. This is my journey through the world of data analysis."
   job = "Undergraduate student"
   location = "Cambridge, MA. Santiago, Chile"
   # Your Gravatar email. Overwrite `author.picture` everywhere in the blog
@@ -112,7 +112,7 @@ canonifyurls = true
   syntaxHighlighter = "highlight.js"
   highlightjsCDN = "//cdn.bootcss.com"
   highlightjsLang = ["r", "yaml"]
-  highlightjsTheme = "github"
+  highlightjsTheme = "tomorrow-night-dark"
 
   # Hide sidebar on all article page to let article take full width to improve reading, and enjoy wide images and cover images. (true: enable, false: disable)
   clearReading = false
@@ -155,11 +155,12 @@ canonifyurls = true
   # Set this value to `right` if you have old posts to keep the old style on them
   # and define `thumbnailImagePosition` on a post to overwrite this setting
   thumbnailImagePosition = "bottom"
+
   # Automatically select the cover image or the first photo from the gallery of a post if there is no thumbnail image as the thumbnail image
   # Set this value to `true` if you have old posts that use the cover image or the first photo as the thumbnail image
   # and set `autoThumbnailImage` to `false` on a post to overwrite this setting
   autoThumbnailImage = true
-  ifnoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+  ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   # Your favicon path, default is "/favicon.png"
   # favicon = "/favicon.png"
 

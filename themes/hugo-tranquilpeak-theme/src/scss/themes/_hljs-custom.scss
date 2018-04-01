@@ -8,44 +8,120 @@
 // 5. Remove `hljs-` of all CSS class name. E.g : `.hljs-comment` becomes `.comment`
 // 6. Comment line 61 (`'themes/tranquilpeak',`) of `source/_css/tranquilpeak.scss` file
 // 7. Run `grunt buildProd` to build the theme and see the result
-/*
+
 // Default code block
 pre > code {
-    background: ;
-    color: ;
+    background: black;
+    color: #eaeaea;
 }
 
+pre > code.codeblock {
+    overflow-x: auto;
+}
+
+
 // Default inline code
+// code {
+//     background-color: gray;
+//     color: blue ;
+// }
+
 code {
-    background-color: ;
+    background-color: map-get($highlight, 'background');
 }
 
 // Tabbed code block tab
 // If your theme is dark then use a lighter background
 // to see clearly which tab is active
 .codeblock--tabbed figcaption .tab.active {
-    background: ;
-    color: ;
+  background: black;
+  color: #eaeaea;
 }
 
 // highlight code block
 figure.highlight,
 .codeblock {
-    background: ;
-    color: ;
+  background: black;
+  color: #eaeaea;
 
     figcaption {
-        background: ;
-        color: ;
+      background: black;
+      color: #eaeaea;
     }
     .gutter {
-        background: ;
-        border-right-color: ;
+      background: black;
+        border-right-color: black;
         .line {
-            color: ;
+            color: #eaeaea;
         }
     }
     // PUT YOUR THEME HERE
+    /* Tomorrow Night Bright Theme */
+    /* Original theme - https://github.com/chriskempson/tomorrow-theme */
+    /* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+
+    /* Tomorrow Comment */
+    .comment,
+    .quote {
+      color: #969896;
+    }
+
+    /* Tomorrow Red */
+    .variable,
+    .template-variable,
+    .tag,
+    .name,
+    .selector-id,
+    .selector-class,
+    .regexp,
+    .deletion {
+      color: #d54e53;
+    }
+
+    /* Tomorrow Orange */
+    .number,
+    .built_in,
+    .builtin-name,
+    .literal,
+    .type,
+    .params,
+    .meta,
+    .link {
+      color: #e78c45;
+    }
+
+    /* Tomorrow Yellow */
+    .attribute {
+      color: #e7c547;
+    }
+
+    /* Tomorrow Green */
+    .string,
+    .symbol,
+    .bullet,
+    .addition {
+      color: #b9ca4a;
+    }
+
+    /* Tomorrow Blue */
+    .title,
+    .section {
+      color: #7aa6da;
+    }
+
+    /* Tomorrow Purple */
+    .keyword,
+    .selector-tag {
+      color: #c397d8;
+    }
+
+    .emphasis {
+      font-style: italic;
+    }
+
+    .strong {
+      font-weight: bold;
+    }
+
 
 }
-*/
