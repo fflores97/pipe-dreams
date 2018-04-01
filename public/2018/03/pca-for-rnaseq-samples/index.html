@@ -21,7 +21,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="Hugo 0.25.1 with theme Tranquilpeak 0.4.3-BETA">
+    <meta name="generator" content="Hugo 0.37.1 with theme Tranquilpeak 0.4.3-BETA">
     <title>PCA for RNASeq samples</title>
     <meta name="author" content="Felipe Flores">
     <meta name="keywords" content="">
@@ -65,7 +65,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/helpers/jquery.fancybox-thumbs.min.css" integrity="sha256-SEa4XYAHihTcEP1f5gARTB2K26Uk8PsndQYHQC1f4jU=" crossorigin="anonymous" />
     
     
-    <link rel="stylesheet" href="/css/style-s5p1qx70858nkoslc7sxesflswrcgimmfpbcghrlbhftbceyjzbtt9ximjgj.min.css" />
+    <link rel="stylesheet" href="/css/style-sr58flvly2z1l3grq1yaidks56nb5gblmjkmcmyfz6b7nfwqseyujnkcgcp7.min.css" />
     
     
 
@@ -324,12 +324,13 @@ pcaImportanceDF
 ## 8  4 6.598758e-13 Cumulative 1.00000</code></pre>
 <p>As a side note, I just think it’s beautiful how tidyverse packages work so well with each other. I’ve used three only in this one chunk of code and ggplot comes into the picture now.</p>
 <p>All I’ve done is merged (<code>gather</code>ed) the individual and cumulative columns into one. This is something ggplot can use more easily to generate two line graphs in the same window, so let’s do just that. I want the number of PC in the x axis and it’s importance on the y axis. Then I want two different line graphs (with points) to be produced based on whether it’s cumulative or individual</p>
-<pre class="r"><code>importancePlot &lt;- pcaImportanceDF %&gt;%
-  ggplot2::ggplot(aes(x = PC, y = value, group = key, color = key))+ 
-  theme_bw()+
-  geom_line()+ 
-  geom_point()+
-  labs(title = &quot;Importance of PCs&quot;, y = &quot;Percent of Variance explained&quot;)+ # Add nice labels and title
+<pre class="r"><code>importancePlot &lt;-
+  pcaImportanceDF %&gt;%
+  ggplot2::ggplot(aes(x = PC, y = value, group = key, color = key)) + 
+  theme_bw() +
+  geom_line() + 
+  geom_point() +
+  labs(title = &quot;Importance of PCs&quot;, y = &quot;Percent of Variance explained&quot;) + # Add nice labels and title
   theme(plot.title = element_text(hjust = 0.5), legend.title = element_blank()) # Center title and remove legend title
 
 importancePlot</code></pre>
@@ -350,9 +351,16 @@ pcaDF
 ## 4 SUM159.shNLGN4X.2_DOX.plus    13.3 -134.   -2.00 5.52e-13</code></pre>
 <p>This is exactly what I need! Go <code>prcomp</code>! All I have to do now is tell <code>ggrid</code> to plot these in a grid. I’ll just do the bottom half of the grid and I may use the top half for correlation plots in the future. This is also where I get the freedom to include as many PCs as I want and to color by sample</p>
 <pre class="r"><code>numberOfPCs &lt;- 3
-pcaPlot &lt;- GGally::ggpairs(data = pcaDF, columns = 1:numberOfPCs + 1, mapping = aes(col = Sample), upper = NULL, legend = c(1,1))+
-  theme_bw()+
-  labs(title = &quot;Principal Components&quot;)+
+pcaPlot &lt;-
+  GGally::ggpairs(
+  data = pcaDF,
+  columns = 1:numberOfPCs + 1,
+  mapping = aes(col = Sample),
+  upper = NULL,
+  legend = c(1, 1)
+  ) +
+  theme_bw() +
+  labs(title = &quot;Principal Components&quot;) +
   theme(plot.title = element_text(hjust = 0.5), legend.text = element_text(size = 4))
 
 pcaPlot</code></pre>
@@ -362,29 +370,31 @@ pcaPlot</code></pre>
   
   pca &lt;- stats::prcomp(t(expressionMatrix), center = TRUE, scale = TRUE)
   
-  pcaImportanceDF &lt;- pca %&gt;%
+  pcaImportanceDF &lt;-
+    pca %&gt;%
     broom::tidy(matrix = &quot;pcs&quot;) %&gt;%
     dplyr::rename(., Individual = percent, Cumulative = cumulative) %&gt;%
     tidyr::gather(key, value, Individual, Cumulative)
   
-  importancePlot &lt;- pcaImportanceDF %&gt;%
-    ggplot2::ggplot(aes(x = PC, y = value, group = key, color = key))+
-    theme_bw()+
-    geom_line()+
-    geom_point()+
-    labs(title = &quot;Importance of PCs&quot;, y = &quot;Percent of Variance explained&quot;)+
+  importancePlot &lt;-
+    pcaImportanceDF %&gt;%
+    ggplot2::ggplot(aes(x = PC, y = value, group = key, color = key)) +
+    theme_bw() +
+    geom_line() +
+    geom_point() +
+    labs(title = &quot;Importance of PCs&quot;, y = &quot;Percent of Variance explained&quot;) +
     theme(plot.title = element_text(hjust = 0.5), legend.title = element_blank())
   
   pcaDF &lt;- as_data_frame(pca$x, rownames = &quot;Sample&quot;)
   
   pcaPlot &lt;- GGally::ggpairs(
     data = pcaDF,
-    columns = 1:numberOfPCs+1,
+    columns = 1:numberOfPCs + 1,
     mapping = aes(colour = Sample),
     upper = NULL,
-    legend = c(2,1))+
-    theme_bw()+
-    labs(title = &quot;Principal Components&quot;)+
+    legend = c(2,1)) +
+    theme_bw() +
+    labs(title = &quot;Principal Components&quot;) +
     theme(plot.title = element_text(hjust = 0.5), legend.text = element_text(size = 4))
   
   returnList&lt;-list(importancePlot = importancePlot, pcaPlot = pcaPlot)
@@ -431,7 +441,8 @@ if (clusters != 1 || autoClustering) {
   dev.off()
   
   # Join the dataframe with the clustering information as a tibble
-  pcaDF &lt;- pcaDF %&gt;% 
+  pcaDF &lt;-
+    pcaDF %&gt;% 
     dplyr::right_join(dplyr::data_frame(
       Sample = names(eclustering$cluster),
       Cluster = LETTERS[eclustering$cluster]
@@ -472,7 +483,7 @@ else { # Case 2: User wants no clustering
   graphingParameters, # aes() parameters from the nested if&#39;s
   list(
     data = pcaDF,
-    columns = 1:numberOfPCs+2,
+    columns = 1:numberOfPCs + 2,
     lower = list(continuous = GGally::wrap(&quot;points&quot;, size = 3)),
     upper = NULL,
     legend = c(2,1)
@@ -482,19 +493,22 @@ else { # Case 2: User wants no clustering
 pcaPlot &lt;- do.call(GGally::ggpairs, graphingParameters) # Generate the plot with these parameters
 
 # Add a few details:
-pcaPlot &lt;- pcaPlot + theme_bw() + 
-  labs(title = &quot;Principal Components&quot;)+
+pcaPlot &lt;- 
+  pcaPlot +
+  theme_bw() + 
+  labs(title = &quot;Principal Components&quot;) +
   theme(plot.title = element_text(hjust = 0.5))
 
 # We also customize the clustering plot from eclust a little bit:
-clusteringPlot &lt;- eclustering$clust_plot + 
-  theme_bw()+
+clusteringPlot &lt;- 
+  eclustering$clust_plot + 
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
 # And return them to the user!
 returnList&lt;-list(importancePlot = importancePlot, pcaPlot = pcaPlot, clusteringPlot = clusteringPlot)
 return(returnList)</code></pre>
-<p>And that completes the function! In one block it looks like:</p>
+<p>And that completes the function! In one block and following tidyverse style guides it looks like:</p>
 <p>Let’s test it out on the airway dataset. First, no autoclustering and user-defined 2 clusters</p>
 <pre class="r"><code>airwayPCAPlots &lt;- samplePCA(airwayMatrix, numberOfPCs = 3, clusters = 2, autoClustering = FALSE)
 ## Joining, by = &quot;Sample&quot;
@@ -783,7 +797,7 @@ airwayPCAPlots$pcaPlot</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.7/js/jquery.fancybox.min.js" integrity="sha256-GEAnjcTqVP+vBp3SSc8bEDQqvWAZMiHyUSIorrWwH50=" crossorigin="anonymous"></script>
 
 
-<script src="/js/script-g5hzkzzhbkzcxlzgda1lto5nqkvzq4rsnbdu5p9fncrutbqd3bgmhmy387ij.min.js"></script>
+<script src="/js/script-aygdnnwzrr3j9ca442nwtz9rsj1wilsdmf3riglprhcm9clv7cjuwhgudbgn.min.js"></script>
 
 
 
