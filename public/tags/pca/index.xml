@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Pca on Pipe Dreams</title>
-    <link>/tags/pca/</link>
+    <link>https://pipedreams.rbind.io/tags/pca/</link>
     <description>Recent content in Pca on Pipe Dreams</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 29 Mar 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/pca/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://pipedreams.rbind.io/tags/pca/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>PCA for RNASeq samples</title>
-      <link>/2018/03/pca-for-rnaseq-samples/</link>
+      <link>https://pipedreams.rbind.io/2018/03/pca-for-rnaseq-samples/</link>
       <pubDate>Thu, 29 Mar 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/03/pca-for-rnaseq-samples/</guid>
+      <guid>https://pipedreams.rbind.io/2018/03/pca-for-rnaseq-samples/</guid>
       <description>Beginning to analyze mRNA data One of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.</description>
     </item>
     
