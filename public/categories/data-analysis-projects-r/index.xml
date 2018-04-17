@@ -6,10 +6,20 @@
     <description>Recent content in Data Analysis Projects R on Pipe Dreams</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 29 Mar 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Apr 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/data-analysis-projects-r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Tidy Tuesday Week 3</title>
+      <link>/2018/04/tidy-tuesday-week-3/</link>
+      <pubDate>Tue, 17 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/04/tidy-tuesday-week-3/</guid>
+      <description>How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
+knitr::opts_chunk$set(collapse = TRUE) library(tidyverse) ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ── ## ✔ ggplot2 2.2.1 ✔ purrr 0.2.4 ## ✔ tibble 1.</description>
+    </item>
     
     <item>
       <title>PCA for RNASeq samples</title>
