@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Pipe Dreams</title>
-    <link>https://pipedreams.rbind.io/post/</link>
-    <description>Recent content in Posts on Pipe Dreams</description>
+    <title>Post on Pipe Dreams - Felipe Flores&#39;s Blog</title>
+    <link>/post/</link>
+    <description>Recent content in Post on Pipe Dreams - Felipe Flores&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 17 Apr 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://pipedreams.rbind.io/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Tidy Tuesday Week 3</title>
-      <link>https://pipedreams.rbind.io/2018/04/tidy-tuesday-week-3/</link>
+      <link>/post/tidy-tuesday-week-3/</link>
       <pubDate>Tue, 17 Apr 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://pipedreams.rbind.io/2018/04/tidy-tuesday-week-3/</guid>
+      <guid>/post/tidy-tuesday-week-3/</guid>
       <description>How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
-knitr::opts_chunk$set(collapse = TRUE) library(tidyverse) ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ── ## ✔ ggplot2 2.2.1 ✔ purrr 0.2.4 ## ✔ tibble 1.</description>
+library(tidyverse) library(rjson) colors &amp;lt;- fromJSON(file = &amp;quot;~/Code/tidy_tuesday/Week_3/colors.json&amp;quot;) Rjson is only needed for my color palette, which I created as a JSON from here.</description>
     </item>
     
     <item>
       <title>PCA for RNASeq samples</title>
-      <link>https://pipedreams.rbind.io/2018/03/pca-for-rnaseq-samples/</link>
+      <link>/post/2018-03-28-pca-plots/</link>
       <pubDate>Thu, 29 Mar 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://pipedreams.rbind.io/2018/03/pca-for-rnaseq-samples/</guid>
+      <guid>/post/2018-03-28-pca-plots/</guid>
       <description>Beginning to analyze mRNA data One of the first parts of my journey into bioinformatics with R was analyzing RNASeq and microarray data. One of the first things I needed to do is Principal Component Analysis (PCA) on all samples and all genes from an already-aligned RNASeq experiment, so I decided to put together a function that would analyze and visualize the data for me, regardless of how many samples are in the experiment.</description>
     </item>
     

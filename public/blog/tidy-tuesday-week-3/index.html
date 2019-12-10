@@ -1,0 +1,794 @@
+
+
+
+    
+
+
+
+
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        <script type="application/ld+json">
+    {
+        "@context" : "http://schema.org",
+        "@type" : "BlogPosting",
+        "mainEntityOfPage": {
+             "@type": "WebPage",
+             "@id": "/"
+        },
+        "articleSection" : "blog",
+        "name" : "Tidy Tuesday Week 3",
+        "headline" : "Tidy Tuesday Week 3",
+        "description" : "How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
+library(tidyverse) library(rjson) colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;) Rjson is only needed for my color palette, which I created as a JSON from here.",
+        "inLanguage" : "en",
+        "author" : "",
+        "creator" : "",
+        "publisher": "",
+        "accountablePerson" : "",
+        "copyrightHolder" : "",
+        "copyrightYear" : "2018",
+        "datePublished": "2018-04-17 00:00:00 &#43;0000 UTC",
+        "dateModified" : "2018-04-17 00:00:00 &#43;0000 UTC",
+        "url" : "/blog/tidy-tuesday-week-3/",
+        "wordCount" : "663",
+        "keywords" : [ "R","Blog" ]
+    }
+    </script>
+        
+            <title>Tidy Tuesday Week 3 - Pipe Dreams - Felipe Flores&#39;s Blog</title>
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.40.1" />
+        
+
+
+        
+            <meta name="author" content="Felipe Flores">
+        
+        
+            
+                <meta name="description" content="Blog by Felipe Flores">
+            
+        
+
+        <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Tidy Tuesday Week 3"/>
+<meta name="twitter:description" content="How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
+library(tidyverse) library(rjson) colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;) Rjson is only needed for my color palette, which I created as a JSON from here."/>
+<meta name="twitter:site" content="@example"/>
+
+        <meta property="og:title" content="Tidy Tuesday Week 3" />
+<meta property="og:description" content="How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
+library(tidyverse) library(rjson) colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;) Rjson is only needed for my color palette, which I created as a JSON from here." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/blog/tidy-tuesday-week-3/" />
+
+
+
+<meta property="article:published_time" content="2018-04-17T00:00:00&#43;00:00"/>
+
+<meta property="article:modified_time" content="2018-04-17T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+        <meta property="og:image" content="//images/logo.png">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+        
+<meta itemprop="name" content="Tidy Tuesday Week 3">
+<meta itemprop="description" content="How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages
+library(tidyverse) library(rjson) colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;) Rjson is only needed for my color palette, which I created as a JSON from here.">
+
+
+<meta itemprop="datePublished" content="2018-04-17T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2018-04-17T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="663">
+
+
+
+<meta itemprop="keywords" content="R," />
+
+        
+
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,800,900|Source+Sans+Pro:400,700">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.css">
+            <link rel="stylesheet" href="/css/main.css">
+            <link rel="stylesheet" href="/css/add-on.css">
+            <link rel="stylesheet" href="/css/academicons.min.css">
+        
+
+        
+            
+                
+            
+        
+
+
+  
+    
+    <link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/dracula.min.css' rel='stylesheet' type='text/css' />
+  
+
+
+      
+    </head>
+    <body>
+
+      
+      <div id="wrapper">
+
+    
+<header id="header">
+    
+      <h1><a href="/">blog</a></h1>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="/">
+                            <i class="fa fa-home">&nbsp;</i>Home
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/blog/">
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Blog
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/categories/">
+                            <i class="fa fa-sitemap">&nbsp;</i>Categories
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="as_sitesearch" value="/">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="as_sitesearch" value="/">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="/">
+                            <h3>
+                                <i class="fa fa-home">&nbsp;</i>Home
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/blog/">
+                            <h3>
+                                <i class="fa fa-newspaper-o">&nbsp;</i>Blog
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories/">
+                            <h3>
+                                <i class="fa fa-sitemap">&nbsp;</i>Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section class="recent-posts">
+            <div class="mini-posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+
+                
+                    
+                
+
+                
+                        <article class="mini-post">
+                            <header>
+                                <h3><a href="/post/tidy-tuesday-week-3/">Tidy Tuesday Week 3</a></h3>
+                                
+                                <time class="published" datetime=
+                                    '2018-04-17'>
+                                    April 17, 2018</time>
+                            </header>
+                            
+
+                        </article>
+                
+                        <article class="mini-post">
+                            <header>
+                                <h3><a href="/post/2018-03-28-pca-plots/">PCA for RNASeq samples</a></h3>
+                                
+                                <time class="published" datetime=
+                                    '2018-03-29'>
+                                    March 29, 2018</time>
+                            </header>
+                            
+
+                        </article>
+                
+                        <article class="mini-post">
+                            <header>
+                                <h3><a href="/post/">Post</a></h3>
+                                
+                                <time class="published" datetime=
+                                    '2018-04-17'>
+                                    April 17, 2018</time>
+                            </header>
+                            
+
+                        </article>
+                
+
+                
+            </div>
+        </section>
+
+    
+        
+</section>
+
+    
+    <div id="main">
+        <article class="post">
+            
+            <header>
+    <div class="title">
+        
+            <h1><a href="/blog/tidy-tuesday-week-3/">Tidy Tuesday Week 3</a></h1>
+            
+        
+        
+    </div>
+</header>
+
+            <div id="content">
+                <p>How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages</p>
+<pre class="r"><code>library(tidyverse)
+library(rjson)
+colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;)</code></pre>
+<p><code>Rjson</code> is only needed for my color palette, which I created as a JSON from <a href="http://tools.medialab.sciences-po.fr/iwanthue/">here</a>. I also imported my color palette as the vector named <code>colors</code>. Next, since I want to be able to produce as many as these plots as I want, I created a function that would let me avoid redundance. The function first checks whether we’re computing for the entire world or just a country, then does the necessary tidying up and plotting. Of course, in order to create the function I first explored the dataset. This is just the finalized product.</p>
+<pre class="r"><code>plotting_function &lt;- 
+  function(
+    data,
+    yearOfInterest,
+    countryName,
+    title = paste(&quot;Share of death by cause, &quot;, countryName, &quot;, &quot;, yearOfInterest, sep = &quot;&quot;),
+    subtitle = &quot;&quot;,
+    caption = &quot;Source: IHME, Global Burden of Disease&quot;
+  ){
+    if (countryName == &quot;World&quot;) {
+      data &lt;- data %&gt;% 
+        filter(year == yearOfInterest) %&gt;% 
+        select(-c(country, country_code, year)) %&gt;% 
+        summarize_all(funs(&quot;sum&quot;))
+    } else {
+      data &lt;- data %&gt;%
+        filter(year == yearOfInterest, country == countryName) %&gt;%
+        select(-c(country, country_code, year))
+    }
+    data %&gt;% 
+      gather(key = &quot;disease&quot;, value = &quot;deaths&quot;) %&gt;% 
+      mutate(deaths = deaths / sum(deaths)) %&gt;% 
+      ggplot(aes(x = reorder(disease, deaths), y = deaths, fill = disease))+
+      geom_bar(stat = &quot;identity&quot;)+
+      geom_text(aes(label = paste(round(100 * deaths, 2), &quot;%&quot;)), hjust = -0.1)+
+      scale_y_continuous(labels = scales::percent, limits = c(0, 0.35))+
+      scale_fill_manual(values = colors)+
+      guides(fill = FALSE)+
+      coord_flip()+
+      xlab(&quot;&quot;)+
+      ylab(&quot;&quot;)+
+      theme_classic()+
+      labs(title = title, subtitle = subtitle, caption = caption)+
+      theme(
+        panel.grid.major.x = element_line(linetype = &quot;dotted&quot;, color = &quot;#5043484A&quot;)
+      )
+  }</code></pre>
+<p>So let’s try it out on the dataset! First we import the data with <code>readxl</code> and use <code>stringr</code> to remove the percentage signs from the variable names. I also decided to omit <code>NA</code>’s, which I think is why my numbers are slightly different from those in the article. Oh well <em>shrug</em></p>
+<pre class="r"><code>data &lt;- readxl::read_xlsx(&quot;~/Code/tidy_tuesday/Week_3/global_mortality.xlsx&quot;) %&gt;% 
+  rename_all(funs(stringr::str_remove_all(., &quot;[(%)]&quot;))) %&gt;% 
+  na.omit() 
+data
+## # A tibble: 4,524 x 35
+##    country country_code  year `Cardiovascular… `Cancers ` `Respiratory di…
+##    &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;            &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;
+##  1 Afghan… AFG           1990             17.6       4.03             2.11
+##  2 Afghan… AFG           1991             17.8       4.05             2.13
+##  3 Afghan… AFG           1992             18.4       4.17             2.21
+##  4 Afghan… AFG           1994             19.1       4.26             2.31
+##  5 Afghan… AFG           1995             19.9       4.39             2.41
+##  6 Afghan… AFG           1996             20.4       4.48             2.49
+##  7 Afghan… AFG           1997             20.4       4.45             2.49
+##  8 Afghan… AFG           1998             19.6       4.26             2.41
+##  9 Afghan… AFG           1999             21.1       4.57             2.60
+## 10 Afghan… AFG           2000             21.4       4.64             2.64
+## # … with 4,514 more rows, and 29 more variables: `Diabetes ` &lt;dbl&gt;,
+## #   `Dementia ` &lt;dbl&gt;, `Lower respiratory infections ` &lt;dbl&gt;, `Neonatal
+## #   deaths ` &lt;dbl&gt;, `Diarrheal diseases ` &lt;dbl&gt;, `Road accidents ` &lt;dbl&gt;,
+## #   `Liver disease ` &lt;dbl&gt;, `Tuberculosis ` &lt;dbl&gt;, `Kidney disease
+## #   ` &lt;dbl&gt;, `Digestive diseases ` &lt;dbl&gt;, `HIV/AIDS ` &lt;dbl&gt;, `Suicide
+## #   ` &lt;dbl&gt;, `Malaria ` &lt;dbl&gt;, `Homicide ` &lt;dbl&gt;, `Nutritional
+## #   deficiencies ` &lt;dbl&gt;, `Meningitis ` &lt;dbl&gt;, `Protein-energy
+## #   malnutrition ` &lt;dbl&gt;, `Drowning ` &lt;dbl&gt;, `Maternal deaths ` &lt;dbl&gt;,
+## #   `Parkinson disease ` &lt;dbl&gt;, `Alcohol disorders ` &lt;dbl&gt;, `Intestinal
+## #   infectious diseases ` &lt;dbl&gt;, `Drug disorders ` &lt;dbl&gt;, `Hepatitis
+## #   ` &lt;dbl&gt;, `Fire ` &lt;dbl&gt;, `Heat-related hot and cold exposure ` &lt;dbl&gt;,
+## #   `Natural disasters ` &lt;dbl&gt;, `Conflict ` &lt;dbl&gt;, `Terrorism ` &lt;dbl&gt;</code></pre>
+<p>Finally, let’s use the function on the world, the US, and my beloved Chile for 2016.</p>
+<pre class="r"><code>plotting_function(data = data, yearOfInterest = 2016, countryName = &quot;World&quot;)</code></pre>
+<p><img src="/post/2018-04-17-tidy-tuesday-week-3_files/figure-html/plots-1.png" width="672" /></p>
+<pre class="r"><code>plotting_function(data = data, yearOfInterest = 2016, countryName = &quot;United States&quot;)</code></pre>
+<p><img src="/post/2018-04-17-tidy-tuesday-week-3_files/figure-html/plots-2.png" width="672" /></p>
+<pre class="r"><code>plotting_function(data = data, yearOfInterest = 2016, countryName = &quot;Chile&quot;)</code></pre>
+<p><img src="/post/2018-04-17-tidy-tuesday-week-3_files/figure-html/plots-3.png" width="672" /></p>
+<p>Nice! Of course, we could input any country and year and get the same kind of plot. That’s all friends!</p>
+
+            </div>
+        </article>
+    </div>
+    
+<section id="sidebar">
+
+  
+  <section id="intro">
+    
+    
+      
+        <a href='/' class="logo"><img src="/img/main/logo.jpg" alt="Hugo Future Imperfect" /></a>
+      
+    
+    
+      <header>
+        <h2>Pipe Dreams</h2>
+        <p>My journey into Linux, data analysis, and machine learning</p>
+      </header>
+    
+    
+      <ul class="icons">
+        
+          
+    <li><a href="/index.xml" type="application/rss+xml" target="_blank" title="RSS" class="fa fa-rss"></a></li>
+
+
+        
+        
+  <li><a href="//github.com/fflores97" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//flickr.com/photos/example" target="_blank" title="Flickr" class="fa fa-flickr"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//linkedin.com/in/example" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+  <li><a href="//linkedin.com/company/examplebusiness" target="_blank" title="LinkedIn Company" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+  <li><a href="//facebook.com/example" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+
+
+  <li><a href="//reddit.com/user/example" target="_blank" title="Reddit" class="fa fa-reddit"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//instagram.com/example" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+
+
+  <li><a href="//twitter.com/example" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+
+
+
+
+  <li><a href="//pinterest.com/example" target="_blank" title="Pinterest" class="fa fa-pinterest-p"></a></li>
+
+
+
+  <li><a href="//telegram.me/example" target="_blank" title="telegram" class="fa fa-telegram"></a></li>
+
+
+
+
+
+
+
+
+
+<li><a href="//researchgate.net/profile/example" target="_blank" title="Research Gate"><i class="ai ai-researchgate"></i></a></li>
+
+
+
+  <li><a href="mailto:example" title="Email" class="fa fa-envelope"></a></li>
+
+
+      </ul>
+    
+  </section>
+
+  
+  <section class="recent-posts">
+    <div class="mini-posts">
+      <header>
+        <h3>Recent Posts</h3>
+      </header>
+      <div class="posts-container">
+        
+
+        
+          
+        
+
+        
+          <article class="mini-post">
+            <header>
+              <h3>
+                <a href="/post/tidy-tuesday-week-3/">Tidy Tuesday Week 3</a>
+              </h3>
+              
+              <time class="published" datetime='2018-04-17'>
+                April 17, 2018
+              </time>
+            </header>
+            
+
+          </article>
+        
+          <article class="mini-post">
+            <header>
+              <h3>
+                <a href="/post/2018-03-28-pca-plots/">PCA for RNASeq samples</a>
+              </h3>
+              
+              <time class="published" datetime='2018-03-29'>
+                March 29, 2018
+              </time>
+            </header>
+            
+
+          </article>
+        
+          <article class="mini-post">
+            <header>
+              <h3>
+                <a href="/post/">Post</a>
+              </h3>
+              
+              <time class="published" datetime='2018-04-17'>
+                April 17, 2018
+              </time>
+            </header>
+            
+
+          </article>
+        
+      </div>
+
+      
+    </div>
+  </section>
+
+  
+  
+  
+  
+  
+    <section id="categories">
+      <header>
+        <h3>
+          <a href="/categories/">Categories</a>
+        </h3>
+      </header>
+        
+          
+        
+
+        
+        <p>
+          <article>
+            <header>
+              
+                <a href="/categories/data-analysis-projects-r/">Data Analysis Projects (R)</a>
+                <span style="float:right;">3</span>
+              
+            </header>
+          </article>
+        </p>
+        
+    </section>
+  
+  
+
+  
+  
+    <section id="mini-bio">
+      <h3>About</h3>
+      <p>I'm Felipe Flores, currently a Schwarzman Scholar at Tsinghua University in Beijing, China. Hopefully, I'll be working with computers and data soon.</p>
+      <a href="/about/" class="button">Learn More</a>
+    </section>
+  
+
+  
+  <section id="footer">
+    
+      <ul class="icons">
+        
+          
+    <li><a href="/index.xml" type="application/rss+xml" target="_blank" title="RSS" class="fa fa-rss"></a></li>
+
+
+        
+        
+  <li><a href="//github.com/fflores97" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//flickr.com/photos/example" target="_blank" title="Flickr" class="fa fa-flickr"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//linkedin.com/in/example" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+  <li><a href="//linkedin.com/company/examplebusiness" target="_blank" title="LinkedIn Company" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+  <li><a href="//facebook.com/example" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+
+
+  <li><a href="//reddit.com/user/example" target="_blank" title="Reddit" class="fa fa-reddit"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//instagram.com/example" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+
+
+  <li><a href="//twitter.com/example" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+
+
+
+
+  <li><a href="//pinterest.com/example" target="_blank" title="Pinterest" class="fa fa-pinterest-p"></a></li>
+
+
+
+  <li><a href="//telegram.me/example" target="_blank" title="telegram" class="fa fa-telegram"></a></li>
+
+
+
+
+
+
+
+
+
+<li><a href="//researchgate.net/profile/example" target="_blank" title="Research Gate"><i class="ai ai-researchgate"></i></a></li>
+
+
+
+  <li><a href="mailto:example" title="Email" class="fa fa-envelope"></a></li>
+
+
+      </ul>
+    
+    <p class="copyright">
+      
+        &copy; 2018
+        
+          Pipe Dreams - Felipe Flores&#39;s Blog
+        
+      .
+      Powered by <a href="//gohugo.io" target="_blank">Hugo</a>
+    </p>
+  </section>
+</section>
+
+    </div>
+    <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+    
+
+    
+      
+    
+
+    
+      
+      
+      
+        <script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+        
+        
+        
+        <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+        <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+        <script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/css.min.js"></script>
+        <script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+      
+    
+    
+    
+      <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/skel/3.0.1/skel.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.js"></script>
+      <script src="/js/util.js"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/backToTop.js"></script>
+    
+
+    
+      
+        
+      
+    
+
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+      <script src="//yihui.name/js/math-code.js"></script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+  </body>
+</html>
+

@@ -19,17 +19,25 @@ output:
 
 How's it going everyone?! Well, I decided to join Thomas Mock's #TidyTuesday on twitter and this is my second submission. I'll write a second post on my first submission because that took a little longer to figure out. Anyway let's get going! First, let's import the necessary packages
 
-```{r setup, include=TRUE, echo=TRUE}
-knitr::opts_chunk$set(collapse = TRUE)
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(
+	message = FALSE,
+	warning = FALSE,
+	collapse = TRUE,
+	include = TRUE
+)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 library(tidyverse)
 library(rjson)
-colors <- fromJSON(file = "~/Code/tidy_tuesday/tidy_tuesday_week_3/colors.json")
+colors <- fromJSON(file = "~/Code/tidy_tuesday/Week_3/colors.json")
 ```
 
 `Rjson` is only needed for my color palette, which I created as a JSON from [here](http://tools.medialab.sciences-po.fr/iwanthue/). I also imported my color palette as the vector named `colors`. Next, since I want to be able to produce as many as these plots as I want, I created a function that would let me avoid redundance. The function first checks whether we're computing for the entire world or just a country, then does the necessary tidying up and plotting. Of course, in order to create the function I first explored the dataset. This is just the finalized product.
 
 
-```{r function, echo=TRUE, include=TRUE}
+```{r function, echo=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 plotting_function <- 
   function(
     data,
@@ -71,8 +79,8 @@ plotting_function <-
 
 So let's try it out on the dataset! First we import the data with `readxl` and use `stringr` to remove the percentage signs from the variable names. I also decided to omit `NA`'s, which I think is why my numbers are slightly different from those in the article. Oh well *shrug*
 
-```{r data_import}
-data <- readxl::read_xlsx("~/Code/tidy_tuesday/tidy_tuesday_week_3/global_mortality.xlsx") %>% 
+```{r data_import, include=TRUE}
+data <- readxl::read_xlsx("~/Code/tidy_tuesday/Week_3/global_mortality.xlsx") %>% 
   rename_all(funs(stringr::str_remove_all(., "[(%)]"))) %>% 
   na.omit() 
 data
@@ -80,7 +88,7 @@ data
 
 Finally, let's use the function on the world, the US, and my beloved Chile for 2016. 
 
-```{r plots}
+```{r plots, include=TRUE}
 plotting_function(data = data, yearOfInterest = 2016, countryName = "World")
 plotting_function(data = data, yearOfInterest = 2016, countryName = "United States")
 plotting_function(data = data, yearOfInterest = 2016, countryName = "Chile")

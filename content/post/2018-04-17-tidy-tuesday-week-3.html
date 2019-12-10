@@ -20,18 +20,9 @@ output:
 
 
 <p>How’s it going everyone?! Well, I decided to join Thomas Mock’s #TidyTuesday on twitter and this is my second submission. I’ll write a second post on my first submission because that took a little longer to figure out. Anyway let’s get going! First, let’s import the necessary packages</p>
-<pre class="r"><code>knitr::opts_chunk$set(collapse = TRUE)
-library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
-## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
-## ✔ tidyr   0.8.0     ✔ stringr 1.3.0
-## ✔ readr   1.1.1     ✔ forcats 0.3.0</code></pre>
-<pre><code>## ── Conflicts ─────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(rjson)
-colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/tidy_tuesday_week_3/colors.json&quot;)</code></pre>
+<pre class="r"><code>library(tidyverse)
+library(rjson)
+colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/Week_3/colors.json&quot;)</code></pre>
 <p><code>Rjson</code> is only needed for my color palette, which I created as a JSON from <a href="http://tools.medialab.sciences-po.fr/iwanthue/">here</a>. I also imported my color palette as the vector named <code>colors</code>. Next, since I want to be able to produce as many as these plots as I want, I created a function that would let me avoid redundance. The function first checks whether we’re computing for the entire world or just a country, then does the necessary tidying up and plotting. Of course, in order to create the function I first explored the dataset. This is just the finalized product.</p>
 <pre class="r"><code>plotting_function &lt;- 
   function(
@@ -71,24 +62,24 @@ colors &lt;- fromJSON(file = &quot;~/Code/tidy_tuesday/tidy_tuesday_week_3/color
       )
   }</code></pre>
 <p>So let’s try it out on the dataset! First we import the data with <code>readxl</code> and use <code>stringr</code> to remove the percentage signs from the variable names. I also decided to omit <code>NA</code>’s, which I think is why my numbers are slightly different from those in the article. Oh well <em>shrug</em></p>
-<pre class="r"><code>data &lt;- readxl::read_xlsx(&quot;~/Code/tidy_tuesday/tidy_tuesday_week_3/global_mortality.xlsx&quot;) %&gt;% 
+<pre class="r"><code>data &lt;- readxl::read_xlsx(&quot;~/Code/tidy_tuesday/Week_3/global_mortality.xlsx&quot;) %&gt;% 
   rename_all(funs(stringr::str_remove_all(., &quot;[(%)]&quot;))) %&gt;% 
   na.omit() 
 data
 ## # A tibble: 4,524 x 35
 ##    country country_code  year `Cardiovascular… `Cancers ` `Respiratory di…
 ##    &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;            &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;
-##  1 Afghan… AFG          1990.             17.6       4.03             2.11
-##  2 Afghan… AFG          1991.             17.8       4.05             2.13
-##  3 Afghan… AFG          1992.             18.4       4.17             2.21
-##  4 Afghan… AFG          1994.             19.1       4.26             2.31
-##  5 Afghan… AFG          1995.             19.9       4.39             2.41
-##  6 Afghan… AFG          1996.             20.4       4.48             2.49
-##  7 Afghan… AFG          1997.             20.4       4.45             2.49
-##  8 Afghan… AFG          1998.             19.6       4.26             2.41
-##  9 Afghan… AFG          1999.             21.1       4.57             2.60
-## 10 Afghan… AFG          2000.             21.4       4.64             2.64
-## # ... with 4,514 more rows, and 29 more variables: `Diabetes ` &lt;dbl&gt;,
+##  1 Afghan… AFG           1990             17.6       4.03             2.11
+##  2 Afghan… AFG           1991             17.8       4.05             2.13
+##  3 Afghan… AFG           1992             18.4       4.17             2.21
+##  4 Afghan… AFG           1994             19.1       4.26             2.31
+##  5 Afghan… AFG           1995             19.9       4.39             2.41
+##  6 Afghan… AFG           1996             20.4       4.48             2.49
+##  7 Afghan… AFG           1997             20.4       4.45             2.49
+##  8 Afghan… AFG           1998             19.6       4.26             2.41
+##  9 Afghan… AFG           1999             21.1       4.57             2.60
+## 10 Afghan… AFG           2000             21.4       4.64             2.64
+## # … with 4,514 more rows, and 29 more variables: `Diabetes ` &lt;dbl&gt;,
 ## #   `Dementia ` &lt;dbl&gt;, `Lower respiratory infections ` &lt;dbl&gt;, `Neonatal
 ## #   deaths ` &lt;dbl&gt;, `Diarrheal diseases ` &lt;dbl&gt;, `Road accidents ` &lt;dbl&gt;,
 ## #   `Liver disease ` &lt;dbl&gt;, `Tuberculosis ` &lt;dbl&gt;, `Kidney disease

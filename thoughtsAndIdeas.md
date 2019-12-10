@@ -10,3 +10,13 @@
 * METABRIC Gaussian mixture model
 * tSNE
 * TCGA Biolinks
+
+# Docker
+
+* Media server
+* Git server
+
+# ML
+
+* Autoencoder
+* Matrix Machine
